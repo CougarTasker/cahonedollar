@@ -30,18 +30,28 @@ exports.setController = controller=>{
 	controller.addReceiveMessageHandler("getList",player=>{
 		controller.sendMessage(player,"receiveList",waitingPlayerList.map(playerToRow));
 	});
-	controller.addReceiveMessageHandler("getMyData",player=>{
-		data = {name:player.name,gamesPlayed:player.gamesPlayed};
+	controller.addReceiveMessageHandler("myData",player=>{
+		data = {name:player.name};
 		if(player.highScore){
 			data.highScore = player.highScore;
 		}
-		controller.sendMessage(player,"receiveMyData",data);
+		if(player.gamesWon){
+			data.gamesWon = player.gamesWon;
+		}
+		if(player.gamesPlayed){
+			data.gamesPlayed = player.gamesPlayed;
+		}
+		controller.sendMessage(player,"myData",data);
 	});
 	controller.addReceiveMessageHandler("close",player=>{//if the player leaves the page 
 		controller.changeState(player,"logout");
 	});
 	controller.addReceiveMessageHandler("name",(player,name)=>{
 		resp = nameControl.editName(player.name,name);
+		if(resp.success){
+			controller.broadcastMessage("editName",{id:player.publicKey,name:resp.name});
+			player.name = resp.name;
+		}
 		controller.sendMessage(player,"name",resp);
 	});
 }

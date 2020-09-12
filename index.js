@@ -75,15 +75,13 @@ function Controller(page){
 		this.receiveMessageHandlers.push({messageType:messageType,function:handler});
 	}
 	var checkSend = (playerWrapper,message)=>{
-			console.log("player" + playerWrapper.page.location);
-			console.log("message"+ JSON.stringify(message));
 			if(playerWrapper.ws != null && playerWrapper.ws.readyState == 1){//check the connection is ready
 				if(playerWrapper.page==this.page){
 					playerWrapper.ws.send(JSON.stringify(message));//send message
 				}else{
-					console.log("player" + playerWrapper.page.location);
-					console.log("controller "+ this.page.location);
-					console.log("send message to gone player");
+					// console.log("player" + playerWrapper.page.location);
+					// console.log("controller "+ this.page.location);
+					// console.log("send message to gone player");
 				}
 			}else{
 				setTimeout(()=>{
@@ -174,29 +172,30 @@ app.ws('*', function(ws, req) {
 GlobalAdresses = /^\/(js|css|replaced)\/.*/
 
 app.get("*",function(req,res,next){
-	var location = "/";
+	res.correctBaseLocation = "/";
 	if(req.cookies["id"]&&Id.isPri(req.cookies["id"])){
 		//get player by id
 		player = players[req.cookies["id"]];
 		//let the controller know the player has join
 		triggerHandlers(player,{messageType:"join"});
 		//set the location to the page the player should be in.
-		location = player.page.location
+		res.correctBaseLocation = player.page.location
 	}else{
 		//new player
 		var p = new Player();
 		players[p.data.privateKey] = p;
 		res.cookie('id', p.data.privateKey);
-		location = "/"; 
+		res.correctBaseLocation = "/"; 
 		// redirect to the login page for new users 
 	}
-
-	if(GlobalAdresses.test(req.url) || req.url == location){
+	paths = new RegExp("^"+res.correctBaseLocation+"[^\/]*$");
+	//any adress that starts with the location not subfolders
+	if(GlobalAdresses.test(req.url) || paths.test(req.url)){
 		//everthing is fine carry on
 		next();
 	}else{
 		//the player is at the wrong adress
-		res.redirect(location);
+		res.redirect(res.correctBaseLocation);
 	}
 });
 
@@ -204,6 +203,9 @@ app.get("*",function(req,res,next){
 
 
 app.use(express.static('public'));
+app.use((req,res,next)=>{
+    res.redirect(res.correctBaseLocation);
+});
 var port = process.env.PORT || 80;
 app.listen(port);
 

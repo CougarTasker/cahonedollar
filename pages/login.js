@@ -25,7 +25,7 @@ exports.setController = controller=>{
 				player.gamesPlayed =0;
 				controller.changeState(player,"user");
 			}else{
-				controller.sendMessage(player,"fail",response.message);
+				controller.sendMessage(player,"name",response);
 			}
 		}
 	});

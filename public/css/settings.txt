@@ -1,0 +1,7 @@
+grey : #a3a3a3
+blue:55b9f3
+
+settings
+
+at 300 size radius of 20
+distance 12

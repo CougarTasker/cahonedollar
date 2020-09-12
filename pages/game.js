@@ -1,23 +1,23 @@
-
-
 exports.controller = null;
-// change the player state 
-// changeState(state,player)
-// sendMessage(messageType,messageData,player)
-// addReceiveMessageHandler(messageType,handler)
 
-// if player is ommited this will be for all players
-// to send a message to a player
+
+
+gameState = 0; // 0 = pick white cards, 1 pick winning card, 2 celbration and scorebord
+this.WinningCardPicker = null;
+this.players = {};
+exports.addPlayer = player => {
+	this.players[player.publicKey] = player
+};
+exports.removePlayer = player => {
+	
+	delete this.players[players.publicKey];
+};
+
 
 exports.location = "/game/"
-exports.addPlayer = player => {};
-exports.removePlayer = player => {};
+
 exports.setController = controller=>{
 	this.controller = controller
-	controller.addReceiveMessageHandler("name",(data,player)=>{
-		console.log("name!!");
-		player.name = data;
-		controller.changeState("user",player);
-	});
+	
 }
 exports.getController = ()=>{return this.controller}

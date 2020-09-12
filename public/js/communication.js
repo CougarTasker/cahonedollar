@@ -11,7 +11,6 @@ function S(){
        this.ws.onopen = function() {
           
           $(document).ready(()=>{
-            console.log(self);
             for(ready of self.readys){
               ready();
             }

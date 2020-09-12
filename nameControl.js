@@ -1,23 +1,22 @@
 var sanitizeHtml = require('sanitize-html');
-
 nameList = [];
 exports.addName = name =>{
 	empty =  RegExp('^\s*$');
 	regular = RegExp(/^(\w|[\<\>\/\\:;\-\+\(\)$£%!~$]|\s)*$/);
-	out = {success:true,message:"name registered successfully",name:""}
-	nameFixed = sanitizeHtml(name,{allowedTags:['b', 'i', 'em', 'strong']}).trim();
+	nameFixed = sanitizeHtml(name,{allowedTags:[]}).trim();
+	out = {success:true,message:"name registered successfully",name:nameFixed}
 	if(nameList.includes(nameFixed)){
 		out.success = false;
 		out.message = "The name you have picked already exists";
-		out.name="";
-	}else if(empty.test(nameFixed)){
+	}else if(empty.test(nameFixed)|| !(name)){
 		out.success = false;
 		out.message="Your name cannot be empty";
-		out.name="";
 	}else if(!regular.test(nameFixed)){
 		out.success = false;
 		out.message = "your name must only contain regular characters";
-		out.name = "";
+	}else if(nameFixed.length>20){
+		out.success = false;
+		out.message = "your name cannot contain more than 20 characters";
 	}else{
 		out.success = true;
 		nameList.push(nameFixed);
@@ -26,7 +25,6 @@ exports.addName = name =>{
 		}else{
 			out.message = "name registered successfully";
 		}
-		out.name = nameFixed;
 	}
 	return out;
 };
@@ -36,10 +34,12 @@ exports.removeName = name=>{
 exports.editName = (oldname,newname)=>{
 	out = this.addName(newname);
 	if(oldname == out.name){
-		out.message == "name not changed";
+		out.message = "name not changed";
 	}
 	if(out.success){
 		this.removeName(oldname);
+	}else{
+		out.name = oldname;
 	}
 	return out;
 }
