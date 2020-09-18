@@ -14,6 +14,7 @@ body{
 	font-weight: 400;
 	font-size: 14px;
 }
+
 .title.section,.title.spacer{
 	text-align: center;
 	align-self: center;
@@ -24,7 +25,7 @@ body{
 .half{
 	flex-shrink: 0;
 	flex-grow: 1;
-	flex-basis: 500px;
+	flex-basis: 50%;
 	padding: 0 10px;
 	box-sizing: border-box;
 	display: flex;
@@ -55,6 +56,9 @@ body{
 	visibility: hidden;
 }
 @media only screen and (max-width: 999px) {
+	body{
+		flex-direction: column;
+	}
 	.spacer{
 		display: none;
 	}
