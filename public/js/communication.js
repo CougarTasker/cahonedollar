@@ -1,7 +1,7 @@
 function S(){
         let adress
       if(location.protocol == 'https:'){
-        adress = "wss://"+location.host+":80";
+        adress = "ws://"+location.host+":80";
       }else{
         adress = "ws://"+location.host+":80";
       }
