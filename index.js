@@ -48,10 +48,10 @@ rel=[
 function Controller(page){
 	this.page = page;
 	this.receiveMessageHandlers = [];//{messageType,function}  function(player,data)
-	this.changeState = (player,state)=>{
+	this.changeState = (state,player)=>{
 		trans = rel.filter(val => {return val.transition == state});
 		var swap = playerWrapper=>{
-			for(transition of trans){
+			for(let transition of trans){
 				if(playerWrapper.page == transition.from){
 					playerWrapper.page = transition.to;
 					//add and remove the player from the relvent pages
@@ -64,9 +64,9 @@ function Controller(page){
 		};
 		if(player){
 			playerWrapper = players[player.privateKey];//convert from player data to player wrapper;
-			swap(playerWrapper);
+				swap(playerWrapper);
 		}else{
-			for(playerWrapper of object.values(players)){
+			for(playerWrapper of Object.values(players)){
 				swap(playerWrapper);
 			}
 		}
@@ -92,7 +92,7 @@ function Controller(page){
 	this.broadcastMessage = (messageType,messageData)=>{
 		var message = {};
 		message.messageType=messageType;
-		if(messageData){
+		if(messageData != undefined && messageData != null){
 			message.messageData=messageData;
 		}
 		relvent = Object.values(players).filter(playerWrapper=>{return playerWrapper.page==this.page});
@@ -103,7 +103,7 @@ function Controller(page){
 	this.sendMessage = (player,messageType,messageData)=>{
 		var message = {};
 		message.messageType=messageType;
-		if(messageData){
+		if(messageData != undefined && messageData != null){
 			message.messageData=messageData;
 		}
 		playerWrapper = players[player.privateKey];//convert from player data to player wrapper;

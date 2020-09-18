@@ -22,7 +22,7 @@ exports.addPlayer = player => {
 	this.controller.broadcastMessage("addPlayer",playerToRow(player));
 };
 exports.removePlayer = player => {
-	waitingPlayerList  = waitingPlayerList.filter(cur=>{return cur.publicKey != player.publicKey});
+	waitingPlayerList  = waitingPlayerList.filter(cur=>cur.publicKey != player.publicKey);
 	this.controller.broadcastMessage("removePlayer",player.publicKey);
 };
 exports.setController = controller=>{
@@ -44,7 +44,7 @@ exports.setController = controller=>{
 		controller.sendMessage(player,"myData",data);
 	});
 	controller.addReceiveMessageHandler("close",player=>{//if the player leaves the page 
-		controller.changeState(player,"logout");
+		controller.changeState("logout",player);
 	});
 	controller.addReceiveMessageHandler("name",(player,name)=>{
 		resp = nameControl.editName(player.name,name);
@@ -53,6 +53,10 @@ exports.setController = controller=>{
 			player.name = resp.name;
 		}
 		controller.sendMessage(player,"name",resp);
+	});
+
+	controller.addReceiveMessageHandler("start",player=>{//if the player leaves the page 
+		controller.changeState("start");
 	});
 }
 exports.getController = ()=>{return this.controller}

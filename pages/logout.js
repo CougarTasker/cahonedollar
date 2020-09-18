@@ -7,7 +7,7 @@ exports.setController = controller=>{
 	controller.addReceiveMessageHandler("join",player=>{
 	//if a player joins they are no longer logged out
 		console.log("reconnect");
-		controller.changeState(player,"reconnect");
+		controller.changeState("reconnect",player);
 	});
 }
 exports.getController = ()=>{return this.controller}

@@ -17,13 +17,13 @@ exports.setController = controller=>{
 	controller.addReceiveMessageHandler("name",(player,name)=>{
 		if(name=="admin"){
 			player.name = name;
-			controller.changeState(player,"admin");
+			controller.changeState("admin",player);
 		}else{
 			response = nameControl.addName(name);
 			if(response.success){
 				player.name = name;
 				player.gamesPlayed =0;
-				controller.changeState(player,"user");
+				controller.changeState("user",player);
 			}else{
 				controller.sendMessage(player,"name",response);
 			}

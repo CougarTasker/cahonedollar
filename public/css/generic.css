@@ -7,15 +7,16 @@ body{
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
-	align-content: stretch; 
+	align-content: stretch;
 	min-height: 100vh;
 	font-family: 'Open Sans', sans-serif;
 	color: white;
 	font-weight: 400;
-	font-size: 16px;
+	font-size: 14px;
 }
 .title.section,.title.spacer{
 	text-align: center;
+	align-self: center;
 	font-size: 2.2em;
 	padding: 0.5em;
 	font-family: 'Roboto', sans-serif;

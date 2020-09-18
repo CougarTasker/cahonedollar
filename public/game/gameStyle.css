@@ -1,0 +1,87 @@
+body{
+	max-width: 100vw;
+	font-size: 16px;
+}
+.half.white{
+	align-items: flex-start;
+
+}
+.half.black{
+	flex-wrap: wrap;
+	justify-content: center;
+	flex-direction: row;
+	align-content: center;
+}
+.card{
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  box-sizing: border-box;
+  word-wrap: anywhere;
+  flex-grow: 0;
+  padding: 12px;
+  border-radius: 20px;
+  background: #55b9f3;
+  box-shadow:  8px 8px 16px #489dcf, 
+             -8px -8px 16px #62d5ff;
+  margin:15px;
+  flex-shrink: 0;
+  width: 3.5cm;
+  min-height: 4cm;
+}
+.black:not(.invalid) .card{
+	background: linear-gradient(145deg, #5bc6ff, #4da7db);
+	cursor: pointer;
+}
+.black .card.selected{
+	background: linear-gradient(145deg, #4da7db, #5bc6ff);
+}
+
+
+.white .card{
+	background: #a3a3a3;
+	box-shadow:  8px 8px 16px #8b8b8b, 
+             	-8px -8px 16px #bbbbbb;
+}
+
+.title.section{
+	order: 0;
+}
+.blackCard{
+	order: 1;
+}
+
+#combWrapper{
+	order: 2;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: space-around;
+	min-height: 200px;
+}
+.combCard{
+	display: flex;
+	flex-direction: row;
+	width: auto;
+	height: auto;
+	box-shadow: inset 5px 5px 10px #8b8b8b, 
+            inset -5px -5px 10px #bbbbbb;
+	padding: 0;
+	border-radius: 30px;
+	margin:10px;
+	
+}
+#combWrapper:not(.show) .combCard{
+	filter: blur(3px);
+}
+#combWrapper.pick .combCard{
+	cursor: pointer;
+}
+#combWrapper.pick .card{
+    /*margin-right: 0;*/
+    background: linear-gradient(145deg, #aeaeae, #939393);
+}
+/*.combCard>.card:last-child{
+	margin-right: 15px;
+}*/

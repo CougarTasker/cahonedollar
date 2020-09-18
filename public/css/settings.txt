@@ -1,5 +1,5 @@
 grey : #a3a3a3
-blue:55b9f3
+blue: #55b9f3
 
 settings
 

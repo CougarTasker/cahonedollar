@@ -26,7 +26,7 @@ function S(){
           }
           for(handel of self.receiveMessageHandlers){//call the correct handlers for this type of rquest
             if(handel.messageType == data.messageType){
-              if(data.messageData){
+              if(data.messageData != undefined && data.messageData != null){
                 handel.function(data.messageData);
               }else{
                 handel.function();
@@ -56,7 +56,7 @@ function S(){
        }
        this.sendMessage = (messageType,messageData)=>{
         message = {messageType:messageType}
-        if(messageData){
+        if(messageData != undefined && message != null){
           message.messageData = messageData;
         }
         message = JSON.stringify(message);
