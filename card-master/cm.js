@@ -57,8 +57,8 @@ done = ()=>{
 }
 
 //function multiCardMaster(cma,cmb,fact){
-	exports.cma= new cardMaster("./cust.csv",done);
-	exports.cmb = new cardMaster("./Cards_Against_Humanity.csv",done);
+	exports.cma= new cardMaster("./card-master/cust.csv",done);
+	exports.cmb = new cardMaster("./card-master/Cards_Against_Humanity.csv",done);
 	exports.fact = 0.5;
 	exports.pblack = []
   exports.ready = (fun)=>{
