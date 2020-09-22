@@ -1,8 +1,6 @@
 addRow = data=>{
-			out = `<div class="row" row-id="${data.id}">
-							<div>${data.name}</div>
-							<div>${(data.highScore)?data.highScore:"-"}</div>
-						</div>`;
+			out = `	<div row-id="${data.id}" col-id="name">${data.name}</div>
+					<div row-id="${data.id}" col-id="score">${(data.highScore)?data.highScore:"-"}</div>`;
 		$(".table.player-list").append(out);
 	}
 Server.ready(()=>{
@@ -38,7 +36,7 @@ Server.ready(()=>{
 	});
 	Server.addReceiveMessageHandler("addPlayer",addRow);
 	Server.addReceiveMessageHandler("editName",data=>{
-		$("[row-id=\""+data.id+"\"]").children().first().text(data.name);
+		$(`[row-id="${data.id}"][col-id="name"]`).text(data.name);
 	});
 	Server.addReceiveMessageHandler("myData",data=>{
 		$("#name").val(data.name);

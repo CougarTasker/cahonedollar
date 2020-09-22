@@ -1,5 +1,6 @@
 const val = require("../value.js");
 const cm = require("../card-master/cm.js");
+const admin = require("./admin.js");
 exports.controller = null;
 // change the player state 
 // changeState(state,player)
@@ -12,44 +13,9 @@ players = {};
 const whiteCardsCount = 9;
 
 //globals
+
 var blackCard = {};
 var combCards = [];
-var gameState = val.create(0);
-gameState.gameStateTimes = [10,30,30];
-gameState.timer;
-gameState.timeInterval = {};
-gameState.progress = function(self){
-	if(!self){
-		self = this;
-	}
-	clearTimeout(self.timer);
-	self.timeInterval.start = Date.now();
-	self.timeInterval.duration = self.gameStateTimes[self.get()]*1000;
-	self.timeInterval.end = self.timeInterval.start + self.timeInterval.duration;
-	self.timer = setTimeout(self.progress,self.timeInterval.duration,self);
-	self.set(old=>{
-		old += 1;
-		old = old % self.gameStateTimes.length;
-		return old;
-	})
-
-}
-gameState.stop = function(){
-	clearTimeout(self.timer);
-	self.set(()=> 0); 
-}
-gameState.restart = function(){
-	self = this;
-	clearTimeout(self.timer);
-	self.timeInterval.start = Date.now();
-	self.timeInterval.duration = self.gameStateTimes[self.get()]*1000;
-	self.timeInterval.end = self.timeInterval.start + self.timeInterval.duration;
-	self.timer = setTimeout(self.progress,self.timeInterval.duration,self);
-	self.set(()=> 0); 
-	
-}
-cm.ready(()=>blackCard = cm.pickBlackCard());
-
 //converts a dangerous card to a safe one removing public keys and hiding text 
 var combCardSafe = dirty => {
 	var randomizeText = text => {
@@ -64,12 +30,88 @@ var combCardSafe = dirty => {
 	};
 	return {id:dirty.id,cards: (gameState.get()==2)? dirty.cards:dirty.cards.map(card=>{return{text:randomizeText(card.text)}}),hidden:gameState.get()!=2}
 };
-gameState.addSetHandler(()=>{
-	exports.controller.broadcastMessage("timeInterval",this.timeInterval);
+
+var scoreboard = val.create([]);
+
+
+scoreboard.addPlayer = function(player){
+	data = {id:player.publicKey,name:player.name,score:0,status:player.localState,winner:false};
+	this.set(old=>{
+	 old.push(data);
+	 // old.sort((a,b)=>a.score-b.score);
+	 return old;
+	});
+	exports.controller.broadcastMessage("scoreboardAdd",data);
+	admin.getController().broadcastMessage("scoreboardAdd",data);
+}
+scoreboard.removePlayer = function(player){
+	this.set(old=>{
+	 old = old.filter(p => p.id != player.publicKey);
+	 // old.sort((a,b)=>a.score-b.score);
+	 return old;
+	});
+	exports.controller.broadcastMessage("scoreboardRemove",player.publicKey);
+	admin.getController().broadcastMessage("scoreboardRemove",player.publicKey);
+}
+scoreboard.winner = function(player){
+	this.set(old=>{
+		old = old.map(p =>{
+			p.winner = p.id == player.publicKey
+			if(p.winner){
+				p.score += 1;
+			}
+			return p;
+		});
+		old.sort((a,b)=>a.score-b.score).reverse();
+	 	return old;
+	});
+	exports.controller.broadcastMessage("scoreboardWinner",player.publicKey);
+	admin.getController().broadcastMessage("scoreboardWinner",player.publicKey);
+}
+scoreboard.statusChange = function(player){
+	this.set(old=>{
+		old = old.map(p => {
+			if(p.id == player.publicKey){
+				p.status = player.localState
+			}
+			return p;
+		})
+		return old
+	});
+	exports.controller.broadcastMessage("scoreboardStatusChange",{id:player.publicKey,status:player.localState});
+	admin.getController().broadcastMessage("scoreboardStatusChange",{id:player.publicKey,status:player.localState});
+}
+
+var gameState = val.create(3);
+gameState.gameStateTimes = [5,30,30,Infinity];
+gameState.timer;
+// gameState.timeInterval = {};
+
+gameState.addSetHandler(val=>{
+	clearTimeout(gameState.timer);
+	// this.timeInterval.start = Date.now();
+	// this.timeInterval.duration = self.gameStateTimes[val]*1000;
+	// this.timeInterval.end = self.timeInterval.start + self.timeInterval.duration;
+	if(isFinite(gameState.gameStateTimes[val]*1000)){
+		gameState.timer = setTimeout(gameState.set,gameState.gameStateTimes[val]*1000,val=>{
+			if(val != 3){
+				return (val+1)%3
+			}
+			return val;
+		});
+	}
 });
+
+cm.ready(()=>blackCard = cm.pickBlackCard());
+
+
+
+// gameState.addSetHandler(()=>{
+// 	exports.controller.broadcastMessage("timeInterval",this.timeInterval);
+// });
 gameState.addSetHandler(()=>{
 	//add any waiting players
-	exports.controller.changeState("start");
+	//exports.controller.changeState("start");
 	//reset global state
 	blackCard = cm.pickBlackCard();
 	combCards = [];
@@ -85,6 +127,7 @@ gameState.addSetHandler(()=>{
 		player.selectedCards=[];
 		exports.controller.sendMessage(player,"selectedCards",	player.selectedCards);
 		player.localState = 0;
+		scoreboard.statusChange(player);
 		exports.controller.sendMessage(player,"localState",	player.localState);
 		
 	}
@@ -98,18 +141,20 @@ gameState.addSetHandler(()=>{
 	}
 	cardCazh.beenCardCazh = true;
 	cardCazh.localState = 2;
+	scoreboard.statusChange(cardCazh);
 	exports.controller.sendMessage(cardCazh,"localState",cardCazh.localState);
 },1);
 gameState.addSetHandler(()=>{
 	for(player of Object.values(players)){
 		if(player.localState == 0){
 			player.localState = 1;
+			scoreboard.statusChange(player);
 			exports.controller.sendMessage(player,"localState",player.localState);
 		}
 	}
 	exports.controller.broadcastMessage("combCards",combCards);
 	if(combCards.length == 0){
-		gameState.progress();
+		gameState.set(val=>{if(val == 2){return 0}else{return val;}});
 	}
 },2);
 gameState.addSetHandler(val=>exports.controller.broadcastMessage("gameState",val))
@@ -117,23 +162,31 @@ gameState.addSetHandler(val=>exports.controller.broadcastMessage("gameState",val
 exports.location = "/game/"
 exports.addPlayer = player => {
 	//only happens in game state 0;
-	gameState.restart();//restart the game so in gamemode 0
+	gameState.set(val=>0);
 	players[player.publicKey] = player;
 	player.whiteCards = cm.pickNWhiteCards(whiteCardsCount);
 	player.selectedCards = [];
 	player.localState = 0;
 	player.beenCardCazh = false;
+	scoreboard.addPlayer(player)
 };
 exports.removePlayer = player => {
+	scoreboard.removePlayer(player);
 	delete players[player.publicKey];
-	if(Object.values(players).length=2){
-		gameState.stop();//if there arent enough players
-		this.controller.changeState("stop");//remove the remaing players
-	}else if(gameState.get() != 0){
-		//if a player leaves while the game is being played
-		gameState.restart();//restart the game
-	}
+	gameState.set(val=>{
+		if(val != 3){
+			return 0;
+		}else{
+			return 3;//dont reset a game that is over when removing the players
+		}
+	});
 };
+gameState.addSetHandler(()=>{
+	if(Object.keys(players).length<3){
+		this.controller.changeState("stop");//remove the remaing players
+		gameState.set(val=>3);//if there arent enough players when the game starts 
+	}
+},1)
 exports.setController = controller=>{
 	this.controller = controller
 	controller.addReceiveMessageHandler("close",player=>{//if the player leaves the page 
@@ -153,12 +206,19 @@ exports.setController = controller=>{
 					//if they have selected all the nessary cards then we are no logner waiting for them 
 					player.localState = 1;
 					controller.sendMessage(player,"localState",player.localState);
+					scoreboard.statusChange(player);
 					comb = {id:combCards.length,publicKey:player.publicKey,cards:player.selectedCards};
 					combCards.push(comb);
 					controller.broadcastMessage("combCardsAdd",combCardSafe(comb));//todo only send the id and number of cards
 					if(combCards.length == Object.keys(players).length-1){
 						//if everyone has now submitted their cards
-						gameState.progress();
+						gameState.set(val=>{
+							if(val == 1){
+								return 2;
+							} else{
+								return val;
+							}
+						});
 					}
 				}
 			}
@@ -170,24 +230,24 @@ exports.setController = controller=>{
 				controller.sendMessage(player,"selectedCardsRemove",card);
 			}
 	});
-
 	controller.addReceiveMessageHandler("globalData",player=>{
 		controller.sendMessage(player,"blackCard",	    blackCard);
 		controller.sendMessage(player,"combCards",	    combCards.map(combCardSafe));
 		controller.sendMessage(player,"gameState",	    gameState.get());
 		controller.sendMessage(player,"timeInterval",	gameState.timeInterval);
+		controller.sendMessage(player,"scoreboard",		scoreboard.get());
 	});
 	controller.addReceiveMessageHandler("combCardsSelect",(player,cardID)=>{
 		if(player.localState == 2 && gameState.get() == 2){
 			winner = combCards.find(card=>card.id==cardID);
 			if(winner){
 				controller.sendMessage(players[winner.publicKey],"win");
-			    gameState.progress();
+				scoreboard.winner(winner);
+			    gameState.set(val=>0);
 			}
 		}
 	});
-
-	//you need to remove this !!!!!!!!
-	controller.addReceiveMessageHandler("start",()=>gameState.progress());
 }
 exports.getController = ()=>{return this.controller}
+
+admin.setScoreboard(scoreboard);

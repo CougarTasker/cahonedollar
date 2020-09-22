@@ -7,6 +7,31 @@
 	<link rel="stylesheet" href="/css/generic.css">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="/game/gameStyle.css">
+	<style type="text/css" media="screen">
+		.whole{
+			position: absolute;
+		    width: 100vw;
+		    max-width:100%;
+		    min-height: 100vh;
+		    box-sizing: border-box;
+		    display: none;
+		    z-index: 5;
+		}
+		.half.hide{
+			display: none;
+		}
+		.whole.show{
+			display: flex;
+		}
+		.table{
+			grid-template-columns: minmax(15ch, 2fr) 1fr 1fr;
+			max-width: 600px;
+		}
+		.scoreboard .winner{
+			color: #55f362;
+			font-family: 'Roboto', sans-serif;
+		}
+	</style>
 </head>
 <body>
 <!-- 	<div class="whole white">
@@ -18,6 +43,16 @@
 			</div>
 		</div>
 	</div> -->
+	<div class="white whole">
+		<div class="title section">
+			Scoreboard
+		</div>
+		<div class="table scoreboard">
+			<div class="head">Name</div>
+			<div class="head">Score</div>
+			<div class="head">Status</div>
+		</div>
+	</div>
 	<div class="white half">
 		<div class="title section">
 			Welcome

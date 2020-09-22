@@ -7,6 +7,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/css/generic.css">
   <style>
+    .nameEdit{
+          display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px;
+    }
     .align{
       flex-grow: 1;
       display: flex;
@@ -50,8 +56,11 @@
       </div>
       <div class="align">
         <div class="nameEdit">
-          <input type="text" id="name" class="" maxlength = "20"/><a class="button" id="submit"><span>done</span></a>
-          <span class="tooltiptext"></span>
+          <div class="inputWrapper">
+            <input type="text" id="name" class="" maxlength = "20"/>
+            <span class="tooltiptext"></span>
+          </div>
+          <a class="button" id="submit"><span>done</span></a>
         </div>
       </div>
   </div>
