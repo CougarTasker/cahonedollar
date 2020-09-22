@@ -32,6 +32,8 @@ exports.setController = controller=>{
 				controller.sendMessage(player,"name",response);
 			}
 		}
+	},{
+		"type": "string"
 	});
 }
 exports.getController = ()=>{return this.controller}

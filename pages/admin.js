@@ -19,7 +19,11 @@ exports.setController = controller=>{
 	});
 	this.controller.addReceiveMessageHandler("winner",(player,id)=>{
 		this.scoreboard.winner({publicKey:id});
-	});
+	},{
+  "type": "string",
+  "minLength": 12,
+  "maxLength": 12
+});
 	controller.addReceiveMessageHandler("start",player=>{//if the player leaves the page 
 		controller.changeState("start");
 	});

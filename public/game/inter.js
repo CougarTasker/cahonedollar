@@ -161,12 +161,13 @@ Server.ready(()=>{
 	 sound = new Audio("/game/11sec.mp3");
 	 soundTime = null
 	Server.addReceiveMessageHandler("timeInterval",interval=>{
-		sound.stop();
+		sound.volume == 0
 		tl = interval.end- Date.now();
 		clearTimeout(soundTime);
 		length = 11*1000
 		if(tl>length && interval.duration > 2 * length){
 			soundTime = setTimeout(function(sound){
+				sound.volume == 1;
 				sound.play();
 			},tl-11*1000,sound);
 		}

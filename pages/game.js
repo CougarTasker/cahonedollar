@@ -91,7 +91,7 @@ scoreboard.statusChange = function(player){
 }
 
 var gameState = val.create(3);
-gameState.gameStateTimes = [10,45,45,Infinity];
+gameState.gameStateTimes = [6,45,30,Infinity];
 gameState.timer;
 
 
@@ -240,6 +240,10 @@ exports.setController = controller=>{
 					}
 				}
 			}
+	},{
+		"type": "string",
+		"minLength": 12,
+		"maxLength": 12
 	});
 	controller.addReceiveMessageHandler("selectedCardsRemove",(player,cardID)=>{
 			card = player.whiteCards.find(card=>card.id==cardID);
@@ -247,6 +251,10 @@ exports.setController = controller=>{
 				player.selectedCards = player.selectedCards.filter(card => card.id != cardID);
 				controller.sendMessage(player,"selectedCardsRemove",card);
 			}
+	},{
+		"type": "string",
+		"minLength": 12,
+		"maxLength": 12
 	});
 	controller.addReceiveMessageHandler("globalData",player=>{
 		controller.sendMessage(player,"blackCard",	    blackCard);
@@ -277,6 +285,10 @@ exports.setController = controller=>{
 				}
 			}
 		}
+	},{
+		"type": "string",
+		"minLength": 12,
+		"maxLength": 12
 	});
 }
 exports.getController = ()=>{return this.controller}

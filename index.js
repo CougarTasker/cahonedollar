@@ -3,6 +3,7 @@ var cookieParser = require('cookie-parser')
 var Id = require("./id.js");
 var app = express();
 var expressWs = require('express-ws')(app);
+var validate = require('jsonschema').validate;
 app.use(cookieParser());
 
 
@@ -71,8 +72,8 @@ function Controller(page){
 			}
 		}
 	}
-	this.addReceiveMessageHandler =(messageType,handler)=>{
-		this.receiveMessageHandlers.push({messageType:messageType,function:handler});
+	this.addReceiveMessageHandler =(messageType,handler,schema)=>{
+		this.receiveMessageHandlers.push({messageType:messageType,schema:schema,function:handler});
 	}
 	var checkSend = (playerWrapper,message)=>{
 			if(playerWrapper.ws != null && playerWrapper.ws.readyState == 1){//check the connection is ready
@@ -115,8 +116,12 @@ function triggerHandlers(playerWrapper,data){
 	controller =  playerWrapper.page.getController();
 	for(handler of controller.receiveMessageHandlers){
 		if(handler.messageType == data.messageType){
-			if(data.messageData){
-				handler.function(playerWrapper.data,data.messageData);
+			if(data.messageData != undefined && data.messageData != null){
+				if(handler.schema != null && handler.schema != undefined &&validate(data,handler.schema)){
+					handler.function(playerWrapper.data,data.messageData);
+				}else{
+					console.log("schema fail");
+				}
 			}else{
 				handler.function(playerWrapper.data);
 			}
