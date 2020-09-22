@@ -56,6 +56,7 @@ body{
 	order: 2;
 	display: flex;
 	flex-direction: row;
+	align-items: flex-start;
 	flex-wrap: wrap;
 	justify-content: space-around;
 	min-height: 200px;
