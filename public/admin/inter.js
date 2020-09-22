@@ -3,7 +3,10 @@ addRow = data=>{
 					<div class="${(data.winner)?"winner":""}" row-id="${data.id}" col-id="score"	>${(data.score != null && data.score != undefined)?		data.score 				:"-"}</div>
 					<div class="${(data.winner)?"winner":""}" row-id="${data.id}" col-id="status"	>${(data.status != null && data.status != undefined)?	statusMap[data.status]	:"-"}</div>
 					`;
-		$(".table.scoreboard").append(out);
+			elm = $(out).click(event=>{
+		Server.sendMessage("winner",$(event.currentTarget).attr("row-id"));
+	});
+		$(".table.scoreboard").append(elm);
 	}
 statusMap = {
 	0:`<span class="material-icons">hourglass_empty	</span>`,
@@ -55,7 +58,9 @@ Server.ready(()=>{
 		});
 		$(`.scoreboard .winner`).removeClass("winner");//swap the winner class
 		$(`.scoreboard [row-id="${id}"]`).addClass("winner");
-	})
+	});
+	$("#start").click(()=>Server.sendMessage("start"));
+	$("#stop").click(()=>Server.sendMessage("stop"));
 	// Server.addReceiveMessageHandler("editName",data=>{
 	// 	$(`[row-id="${data.id}"][col-id="name"]`).text(data.name);
 	// });

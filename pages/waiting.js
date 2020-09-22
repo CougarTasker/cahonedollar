@@ -54,9 +54,5 @@ exports.setController = controller=>{
 		}
 		controller.sendMessage(player,"name",resp);
 	});
-
-	controller.addReceiveMessageHandler("start",player=>{//if the player leaves the page 
-		controller.changeState("start");
-	});
 }
 exports.getController = ()=>{return this.controller}

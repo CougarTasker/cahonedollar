@@ -30,6 +30,12 @@ var combCardSafe = dirty => {
 	};
 	return {id:dirty.id,cards: (gameState.get()==2)? dirty.cards:dirty.cards.map(card=>{return{text:randomizeText(card.text)}}),hidden:gameState.get()!=2}
 };
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
 
 var scoreboard = val.create([]);
 
@@ -54,6 +60,7 @@ scoreboard.removePlayer = function(player){
 	admin.getController().broadcastMessage("scoreboardRemove",player.publicKey);
 }
 scoreboard.winner = function(player){
+
 	this.set(old=>{
 		old = old.map(p =>{
 			p.winner = p.id == player.publicKey
@@ -65,6 +72,7 @@ scoreboard.winner = function(player){
 		old.sort((a,b)=>a.score-b.score).reverse();
 	 	return old;
 	});
+	exports.controller.sendMessage(players[player.publicKey],"win");
 	exports.controller.broadcastMessage("scoreboardWinner",player.publicKey);
 	admin.getController().broadcastMessage("scoreboardWinner",player.publicKey);
 }
@@ -133,6 +141,12 @@ gameState.addSetHandler(()=>{
 	}
 },0);
 gameState.addSetHandler(()=>{
+	if(Object.keys(players).length<3){
+		this.controller.changeState("stop");//remove the remaing players
+		gameState.set(val=>3);//if there arent enough players when the game starts 
+	}
+},1);
+gameState.addSetHandler(()=>{
 	cardCazh = Object.values(players).find(player=>!player.beenCardCazh);
 	if(!cardCazh){
 		//everyone has been the cardcazh
@@ -152,6 +166,7 @@ gameState.addSetHandler(()=>{
 			exports.controller.sendMessage(player,"localState",player.localState);
 		}
 	}
+	shuffle(combCards);
 	exports.controller.broadcastMessage("combCards",combCards);
 	if(combCards.length == 0){
 		gameState.set(val=>{if(val == 2){return 0}else{return val;}});
@@ -181,12 +196,6 @@ exports.removePlayer = player => {
 		}
 	});
 };
-gameState.addSetHandler(()=>{
-	if(Object.keys(players).length<3){
-		this.controller.changeState("stop");//remove the remaing players
-		gameState.set(val=>3);//if there arent enough players when the game starts 
-	}
-},1)
 exports.setController = controller=>{
 	this.controller = controller
 	controller.addReceiveMessageHandler("close",player=>{//if the player leaves the page 
@@ -241,7 +250,6 @@ exports.setController = controller=>{
 		if(player.localState == 2 && gameState.get() == 2){
 			winner = combCards.find(card=>card.id==cardID);
 			if(winner){
-				controller.sendMessage(players[winner.publicKey],"win");
 				scoreboard.winner(winner);
 			    gameState.set(val=>0);
 			}

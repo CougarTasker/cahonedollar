@@ -70,6 +70,7 @@ body{
 
 
 .table{
+		overflow: hidden;
 		width:80%; 
 		margin:40px 0;
 		border-radius: 20px;
@@ -160,7 +161,7 @@ a.button{
 	align-items: center; /* Vertical center alignment */
 	justify-content: center; /* Horizontal center alignment */
 }
-.noselect,a.button,.title{
+.noselect,a.button,.title,.table{
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
      -khtml-user-select: none; /* Konqueror HTML */
