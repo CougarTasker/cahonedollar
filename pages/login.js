@@ -21,8 +21,12 @@ exports.setController = controller=>{
 		}else{
 			response = nameControl.addName(name);
 			if(response.success){
+				//set data
 				player.name = name;
 				player.gamesPlayed =0;
+				player.gamesWon = 0;
+				player.rounds = [];
+				player.highScore = 0;
 				controller.changeState("user",player);
 			}else{
 				controller.sendMessage(player,"name",response);

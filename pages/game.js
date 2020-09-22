@@ -187,6 +187,12 @@ exports.addPlayer = player => {
 };
 exports.removePlayer = player => {
 	scoreboard.removePlayer(player);
+	//remove unnessary data 
+	delete player.whiteCards;
+	delete player.selectedCards;
+	delete player.localState;
+	delete player.beenCardCazh;
+
 	delete players[player.publicKey];
 	gameState.set(val=>{
 		if(val != 3){
@@ -248,10 +254,24 @@ exports.setController = controller=>{
 	});
 	controller.addReceiveMessageHandler("combCardsSelect",(player,cardID)=>{
 		if(player.localState == 2 && gameState.get() == 2){
-			winner = combCards.find(card=>card.id==cardID);
-			if(winner){
+			winingCard = combCards.find(card=>card.id==cardID);
+			if(winingCard){
+				winner = players[winingCard.publicKey]
+				winner.gamesWon += 1;
 				scoreboard.winner(winner);
 			    gameState.set(val=>0);
+			    //finalize socres
+			    for(player of Object.values(players)){
+					player.gamesPlayed +=1;
+					player.rounds.push(player == winner);
+					if(player.rounds.length>10){
+						player.rounds.shift();
+					}
+			    }
+			    totalScore= winner.rounds.reduce((acc,cur)=>acc+cur,0);
+				if(totalScore > winner.highScore){
+					winner.highScore = totalScore;
+				}
 			}
 		}
 	});
