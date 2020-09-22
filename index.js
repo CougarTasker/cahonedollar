@@ -132,12 +132,22 @@ var Player = function(){
 	this.page = login;
 	this.ws = null;
 	this.data= Id.gen();
+	this.pongTime = null;
+	this.ping = ()=>{
+		if(this.ws && this.ws.readyState == 1){
+			this.ws.ping();
+			if(Date.now() - this.pongTime> 5000){
+				this.ws.close();
+			}
+		}
+	}
 	this.setWs = ws =>{
 		var self = this;
 		if(this.ws){//if the player allready is connected then close the other session
 			this.ws.send('{"messageType":"location","messageData":"/replaced/"}');
 		}
 		this.ws = ws;
+		this.pongTime = Date.now();
 		ws.on('message', function incoming(data) {
 			if(this == self.ws){//only ignore old connections
 				data = JSON.parse(data);
@@ -159,6 +169,11 @@ var Player = function(){
 				},5000);
 			}
 		});
+		ws.on('pong',function pong(){
+			if(this == self.ws){
+				self.pongTime = Date.now();
+			}
+		})
 		triggerHandlers(self,{messageType:"open"});//let pages know the the ws is open
 	}
 }
@@ -174,6 +189,9 @@ app.ws('*', function(ws, req) {
 		ws.close()
 	}
 });
+setInterval(()=>{
+	Object.values(players).forEach(player=>player.ping());
+},2500);
 GlobalAdresses = /^\/(js|css|replaced)\/.*/
 
 app.get("*",function(req,res,next){
