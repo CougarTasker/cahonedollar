@@ -1,5 +1,8 @@
 cardText = card =>`<div class="card noselect" card-id="${card.id}">${card.text}</div>`;
 combCardText = card =>`<div class="combCard noselect" card-id="${card.id}"></div>`;
+
+
+
 Server.ready(()=>{
 	addWhiteCard = card=>{
 		dom = $(cardText(card));
@@ -155,7 +158,18 @@ Server.ready(()=>{
 	// 	$(`[row-id="${data.id}"][col-id="name"]`).text(data.name);
 	// });
 	Server.sendMessage("scoreboard");
-
-
+	 sound = new Audio("/game/11sec.mp3");
+	 soundTime = null
+	Server.addReceiveMessageHandler("timeInterval",interval=>{
+		sound.stop();
+		tl = interval.end- Date.now();
+		clearTimeout(soundTime);
+		length = 11*1000
+		if(tl>length && interval.duration > 2 * length){
+			soundTime = setTimeout(function(sound){
+				sound.play();
+			},tl-11*1000,sound);
+		}
+	});
 	Server.sendMessage("globalData");
 });

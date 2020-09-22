@@ -13,7 +13,7 @@ players = {};
 const whiteCardsCount = 9;
 
 //globals
-
+var timeInterval = {};
 var blackCard = {};
 var combCards = [];
 //converts a dangerous card to a safe one removing public keys and hiding text 
@@ -91,23 +91,24 @@ scoreboard.statusChange = function(player){
 }
 
 var gameState = val.create(3);
-gameState.gameStateTimes = [5,30,30,Infinity];
+gameState.gameStateTimes = [10,45,45,Infinity];
 gameState.timer;
-// gameState.timeInterval = {};
+
 
 gameState.addSetHandler(val=>{
 	clearTimeout(gameState.timer);
-	// this.timeInterval.start = Date.now();
-	// this.timeInterval.duration = self.gameStateTimes[val]*1000;
-	// this.timeInterval.end = self.timeInterval.start + self.timeInterval.duration;
-	if(isFinite(gameState.gameStateTimes[val]*1000)){
-		gameState.timer = setTimeout(gameState.set,gameState.gameStateTimes[val]*1000,val=>{
+	timeInterval.start = Date.now();
+	timeInterval.duration = gameState.gameStateTimes[val]*1000;
+	timeInterval.end = timeInterval.start + timeInterval.duration;
+	if(isFinite(timeInterval.duration)){
+		gameState.timer = setTimeout(gameState.set,timeInterval.duration,val=>{
 			if(val != 3){
 				return (val+1)%3
 			}
 			return val;
 		});
 	}
+	controller.broadcastMessage("timeInterval",	timeInterval);
 });
 
 cm.ready(()=>blackCard = cm.pickBlackCard());
@@ -153,10 +154,12 @@ gameState.addSetHandler(()=>{
 		Object.values(players).forEach(player=>player.beenCardCazh = false);
 		cardCazh = Object.values(players).find(player=>!player.beenCardCazh);
 	}
-	cardCazh.beenCardCazh = true;
-	cardCazh.localState = 2;
-	scoreboard.statusChange(cardCazh);
-	exports.controller.sendMessage(cardCazh,"localState",cardCazh.localState);
+	if(cardCazh){
+		cardCazh.beenCardCazh = true;
+		cardCazh.localState = 2;
+		scoreboard.statusChange(cardCazh);
+		exports.controller.sendMessage(cardCazh,"localState",cardCazh.localState);
+	}
 },1);
 gameState.addSetHandler(()=>{
 	for(player of Object.values(players)){
@@ -249,7 +252,7 @@ exports.setController = controller=>{
 		controller.sendMessage(player,"blackCard",	    blackCard);
 		controller.sendMessage(player,"combCards",	    combCards.map(combCardSafe));
 		controller.sendMessage(player,"gameState",	    gameState.get());
-		controller.sendMessage(player,"timeInterval",	gameState.timeInterval);
+		controller.sendMessage(player,"timeInterval",	timeInterval);
 		controller.sendMessage(player,"scoreboard",		scoreboard.get());
 	});
 	controller.addReceiveMessageHandler("combCardsSelect",(player,cardID)=>{
