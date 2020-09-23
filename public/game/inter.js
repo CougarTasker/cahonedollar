@@ -78,41 +78,40 @@ Server.ready(()=>{
 		updateCover();
 	});
 	updateCover = ()=>{
-		if(localState == 0){
-			$(".black").removeClass("invalid");
-		}else{
-			$(".black").addClass("invalid");
-		}
+		//defults cover everthing up
+		$(".black").addClass("invalid");//dont allow white cards to be selceted 
+		$("#combWrapper").removeClass("show").removeClass("pick");//dont allow comb cards to be seen or picked
+		$(".whole").addClass("show");//show the scoreboard
+		$(".half").addClass("hide");//hide the game
+		if(globalState == 1){
 
-		if(globalState == 2){
-			$("#combWrapper").addClass("show");
-			if(localState == 2){
-				$("#combWrapper").addClass("pick");
+		}else if(globalState == 2){
+			if(localState == 0){
+
 			}
-		}else{
-			$("#combWrapper").removeClass("show").removeClass("pick");
-		}
-		if(globalState == 0){
-			$(".half .title.section").text(`Scoreboard`);
-			$(".whole").addClass("show");
-			$(".half").addClass("hide");
-		}else if(globalState == 1){
+			if(localState == 2){
+
+			}
+		}else if(globalState == 3){
 			$(".whole").removeClass("show");
 			$(".half").removeClass("hide");
 			if(localState == 0){
+				$(".black").removeClass("invalid");
 				$(".half .title.section").text(`Please select blue cards to fill the gap${(spaces==1)?"":"s"}`);
 			}else if(localState == 1){
 				$(".half .title.section").text(`Please wait for everyone to make their decision`);
 			}else if(localState == 2){
 				$(".half .title.section").text(`This round you will pick the winner! Please wait`);
 			}
-		}else if(globalState == 2){
-			$(".half").removeClass("hide");
+		}else if(globalState == 4){
 			$(".whole").removeClass("show");
-			if(localState == 2){
-				$(".half .title.section").text(`Now select the card you think is best`);
-			}else{
+			$(".half").removeClass("hide");
+			if(localState == 1){
+				$("#combWrapper").addClass("show");
 				$(".half .title.section").text(`The winner is being picked`);
+			}else if(localState == 2){
+				$("#combWrapper").addClass("show").addClass("pick");
+				$(".half .title.section").text(`Now select the card you think is best`);
 			}
 		}
 	};

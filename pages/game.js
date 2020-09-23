@@ -28,7 +28,7 @@ var combCardSafe = dirty => {
 		};
 		return text.replace(/\w+/g,word => randomizeWord(word.length));
 	};
-	return {id:dirty.id,cards: (gameState.get()==2)? dirty.cards:dirty.cards.map(card=>{return{text:randomizeText(card.text)}}),hidden:gameState.get()!=2}
+	return {id:dirty.id,cards: (gameState.get()==4)? dirty.cards:dirty.cards.map(card=>{return{text:randomizeText(card.text)}}),hidden:gameState.get()!=4}
 };
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -90,11 +90,9 @@ scoreboard.statusChange = function(player){
 	admin.getController().broadcastMessage("scoreboardStatusChange",{id:player.publicKey,status:player.localState});
 }
 
-var gameState = val.create(3);
-gameState.gameStateTimes = [6,45,30,Infinity];
+var gameState = val.create(0);
+gameState.gameStateTimes = [Infinity,5,3,45,30];
 gameState.timer;
-
-
 gameState.addSetHandler(val=>{
 	clearTimeout(gameState.timer);
 	timeInterval.start = Date.now();
@@ -102,8 +100,8 @@ gameState.addSetHandler(val=>{
 	timeInterval.end = timeInterval.start + timeInterval.duration;
 	if(isFinite(timeInterval.duration)){
 		gameState.timer = setTimeout(gameState.set,timeInterval.duration,val=>{
-			if(val != 3){
-				return (val+1)%3
+			if(val != 0){
+				return (val)%4 +1
 			}
 			return val;
 		});
@@ -140,13 +138,13 @@ gameState.addSetHandler(()=>{
 		exports.controller.sendMessage(player,"localState",	player.localState);
 		
 	}
-},0);
+},1);
 gameState.addSetHandler(()=>{
 	if(Object.keys(players).length<3){
 		this.controller.changeState("stop");//remove the remaing players
-		gameState.set(val=>3);//if there arent enough players when the game starts 
+		gameState.set(val=>0);//if there arent enough players when the game starts 
 	}
-},1);
+},2);
 gameState.addSetHandler(()=>{
 	cardCazh = Object.values(players).find(player=>!player.beenCardCazh);
 	if(!cardCazh){
@@ -160,7 +158,7 @@ gameState.addSetHandler(()=>{
 		scoreboard.statusChange(cardCazh);
 		exports.controller.sendMessage(cardCazh,"localState",cardCazh.localState);
 	}
-},1);
+},2);
 gameState.addSetHandler(()=>{
 	for(player of Object.values(players)){
 		if(player.localState == 0){
@@ -172,15 +170,15 @@ gameState.addSetHandler(()=>{
 	shuffle(combCards);
 	exports.controller.broadcastMessage("combCards",combCards);
 	if(combCards.length == 0){
-		gameState.set(val=>{if(val == 2){return 0}else{return val;}});
+		gameState.set(val=>{if(val == 4){return 1}else{return val;}});
 	}
-},2);
+},4);
 gameState.addSetHandler(val=>exports.controller.broadcastMessage("gameState",val))
 
 exports.location = "/game/"
 exports.addPlayer = player => {
 	//only happens in game state 0;
-	gameState.set(val=>0);
+	gameState.set(val=>1);
 	players[player.publicKey] = player;
 	player.whiteCards = cm.pickNWhiteCards(whiteCardsCount);
 	player.selectedCards = [];
@@ -198,10 +196,10 @@ exports.removePlayer = player => {
 
 	delete players[player.publicKey];
 	gameState.set(val=>{
-		if(val != 3){
-			return 0;
+		if(val != 0){
+			return 1;
 		}else{
-			return 3;//dont reset a game that is over when removing the players
+			return 0;//dont reset a game that is over when removing the players
 		}
 	});
 };
@@ -217,7 +215,7 @@ exports.setController = controller=>{
 	});
 	controller.addReceiveMessageHandler("selectedCardsAdd",(player,cardID)=>{
 			card = player.whiteCards.find(card=>card.id==cardID);
-			if(card && !player.selectedCards.includes(card) && gameState.get()==1 && player.localState == 0){
+			if(card && !player.selectedCards.includes(card) && gameState.get()==3 && player.localState == 0){
 				player.selectedCards.push(card);
 				controller.sendMessage(player,"selectedCardsAdd",card);
 				if(player.selectedCards.length==blackCard.spaces){
@@ -231,8 +229,8 @@ exports.setController = controller=>{
 					if(combCards.length == Object.keys(players).length-1){
 						//if everyone has now submitted their cards
 						gameState.set(val=>{
-							if(val == 1){
-								return 2;
+							if(val == 3){
+								return 4;
 							} else{
 								return val;
 							}
@@ -247,7 +245,7 @@ exports.setController = controller=>{
 	});
 	controller.addReceiveMessageHandler("selectedCardsRemove",(player,cardID)=>{
 			card = player.whiteCards.find(card=>card.id==cardID);
-			if(card && player.selectedCards.includes(card) && gameState.get()==1 && player.localState == 0){
+			if(card && player.selectedCards.includes(card) && gameState.get()==3 && player.localState == 0){
 				player.selectedCards = player.selectedCards.filter(card => card.id != cardID);
 				controller.sendMessage(player,"selectedCardsRemove",card);
 			}
@@ -264,13 +262,13 @@ exports.setController = controller=>{
 		controller.sendMessage(player,"scoreboard",		scoreboard.get());
 	});
 	controller.addReceiveMessageHandler("combCardsSelect",(player,cardID)=>{
-		if(player.localState == 2 && gameState.get() == 2){
+		if(player.localState == 2 && gameState.get() == 4){
 			winingCard = combCards.find(card=>card.id==cardID);
 			if(winingCard){
 				winner = players[winingCard.publicKey]
 				winner.gamesWon += 1;
 				scoreboard.winner(winner);
-			    gameState.set(val=>0);
+			    gameState.set(val=>1);
 			    //finalize socres
 			    for(player of Object.values(players)){
 					player.gamesPlayed +=1;
