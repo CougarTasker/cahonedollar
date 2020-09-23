@@ -19,10 +19,11 @@ Server.ready(()=>{
 		$(".black.half").append(dom);
 	}
 	Server.addReceiveMessageHandler("whiteCards",cards=>{
-		
 		$(".black.half>.card").remove();//remove any existing cards;
 		cards.forEach(addWhiteCard);
 	});
+	myKey = "";
+	Server.addReceiveMessageHandler("publicKey",key=>myKey = key);
 	Server.addReceiveMessageHandler("whiteCardsAdd",(cards)=>cards.forEach(addWhiteCard));
 	Server.addReceiveMessageHandler("whiteCardsRemove",cards=>{
 		cards.forEach(card=>$(`.black.half>.card[card-id="${card.id}"]`).remove())
@@ -118,9 +119,9 @@ Server.ready(()=>{
 
 
 	addRow = data=>{
-			out = `	<div class="${(data.winner)?"winner":""}" row-id="${data.id}" col-id="name"		>${data.name}</div>
-					<div class="${(data.winner)?"winner":""}" row-id="${data.id}" col-id="score"	>${(data.score != null && data.score != undefined)?		data.score 				:"-"}</div>
-					<div class="${(data.winner)?"winner":""}" row-id="${data.id}" col-id="status"	>${(data.status != null && data.status != undefined)?	statusMap[data.status]	:"-"}</div>
+			out = `	<div class="${(data.winner)?"winner":""} ${(data.id == myKey)?"me":""}" row-id="${data.id}" col-id="name"		>${data.name}</div>
+					<div class="${(data.winner)?"winner":""} ${(data.id == myKey)?"me":""}" row-id="${data.id}" col-id="score"	>${(data.score != null && data.score != undefined)?		data.score 				:"-"}</div>
+					<div class="${(data.winner)?"winner":""} ${(data.id == myKey)?"me":""}" row-id="${data.id}" col-id="status"	>${(data.status != null && data.status != undefined)?	statusMap[data.status]	:"-"}</div>
 					`;
 		$(".table.scoreboard").append(out);
 	}

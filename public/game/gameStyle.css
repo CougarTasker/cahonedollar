@@ -86,3 +86,30 @@ body{
 /*.combCard>.card:last-child{
 	margin-right: 15px;
 }*/
+
+.whole{
+	position: absolute;
+    width: 100vw;
+    max-width:100%;
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: none;
+    z-index: 5;
+}
+.half.hide{
+	display: none;
+}
+.whole.show{
+	display: flex;
+}
+.table{
+	grid-template-columns: minmax(15ch, 2fr) 1fr 1fr;
+	max-width: 600px;
+}
+.scoreboard .winner{
+	color: #55f362;
+	font-family: 'Roboto', sans-serif;
+}
+.scoreboard .me{
+	background: #1b303c;
+}

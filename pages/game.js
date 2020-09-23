@@ -211,7 +211,8 @@ exports.setController = controller=>{
 	controller.addReceiveMessageHandler("localData",player=>{
 		controller.sendMessage(player,"whiteCards",		player.whiteCards);
 		controller.sendMessage(player,"selectedCards",	player.selectedCards);
-		controller.sendMessage(player,"localState",		player.localState)
+		controller.sendMessage(player,"localState",		player.localState);
+		controller.sendMessage(player,"publicKey",		player.publicKey);
 	});
 	controller.addReceiveMessageHandler("selectedCardsAdd",(player,cardID)=>{
 			card = player.whiteCards.find(card=>card.id==cardID);
