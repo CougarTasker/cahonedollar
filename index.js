@@ -48,16 +48,18 @@ rel=[
 
 function Controller(page){
 	this.page = page;
-	this.receiveMessageHandlers = [];//{messageType,function}  function(player,data)
+	this.receiveMessageHandlers = {};// messageType =>[{schema,function}]  function(player,data)
 	this.changeState = (state,player)=>{
 		trans = rel.filter(val => {return val.transition == state});
 		var swap = playerWrapper=>{
 			for(let transition of trans){
 				if(playerWrapper.page == transition.from){
-					playerWrapper.page = transition.to;
+					playerWrapper.page = null;//the player is no longer part of any page
 					//add and remove the player from the relvent pages
 					transition.from.removePlayer(playerWrapper.data);
 					transition.to.addPlayer(playerWrapper.data);
+
+					playerWrapper.page = transition.to;
 					playerWrapper.page.getController().sendMessage(playerWrapper.data,"location",playerWrapper.page.location);
 					//send a redirect message to the player whos page has changed
 				}
@@ -73,7 +75,11 @@ function Controller(page){
 		}
 	}
 	this.addReceiveMessageHandler =(messageType,handler,schema)=>{
-		this.receiveMessageHandlers.push({messageType:messageType,schema:schema,function:handler});
+		if(this.receiveMessageHandlers[messageType]){
+			this.receiveMessageHandlers[messageType].push({schema:schema,function:handler});
+		}else{
+			this.receiveMessageHandlers[messageType] = [{schema:schema,function:handler}];
+		}
 	}
 	var checkSend = (playerWrapper,message)=>{
 			if(playerWrapper.ws != null && playerWrapper.ws.readyState == 1){//check the connection is ready
@@ -114,8 +120,9 @@ function Controller(page){
 
 function triggerHandlers(playerWrapper,data){
 	controller =  playerWrapper.page.getController();
-	for(handler of controller.receiveMessageHandlers){
-		if(handler.messageType == data.messageType){
+	handlers = controller.receiveMessageHandlers[data.messageType]
+	if(handlers){//check this is a message type that we accept
+		for(handler of handlers){
 			if(data.messageData != undefined && data.messageData != null){
 				if(handler.schema != null && handler.schema != undefined &&validate(data,handler.schema)){
 					handler.function(playerWrapper.data,data.messageData);
