@@ -91,7 +91,7 @@ scoreboard.statusChange = function(player){
 }
 
 var gameState = val.create(0);
-gameState.gameStateTimes = [Infinity,5,3,45,30];
+gameState.gameStateTimes = [Infinity,5,3,60,60];
 gameState.timer;
 gameState.addSetHandler(val=>{
 	clearTimeout(gameState.timer);
